@@ -1,19 +1,142 @@
 {% extends "base.html" %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Iniciar sesión | HerniaGPT{% endblock %}
 
 {% block content %}
-<div class="card">
-    <h2>Iniciar sesión</h2>
+<div class="flex min-h-[calc(100vh-120px)] items-center justify-center">
+    <div class="grid w-full max-w-6xl overflow-hidden rounded-3xl border border-slate-800 bg-slate-900/70 shadow-2xl shadow-black/30 lg:grid-cols-2">
 
-    <form method="post">
-        {% csrf_token %}
+        <!-- PANEL IZQUIERDO -->
+        <div class="hidden border-r border-slate-800 bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 p-10 lg:flex lg:flex-col lg:justify-between">
+            <div>
+                <div class="mb-6 flex items-center gap-3">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-sm font-bold text-white shadow-lg shadow-blue-600/30">
+                        HG
+                    </div>
+                    <div>
+                        <p class="text-xl font-semibold text-white">HerniaGPT</p>
+                        <p class="text-sm text-slate-400">Asistente conversacional en Django</p>
+                    </div>
+                </div>
 
-        {{ form.as_p }}
+                <h1 class="max-w-md text-4xl font-semibold leading-tight text-white">
+                    Ingresá a tu espacio de trabajo inteligente.
+                </h1>
 
-        <button class="btn" type="submit">
-            Ingresar
-        </button>
-    </form>
+                <p class="mt-4 max-w-md text-base leading-7 text-slate-300">
+                    Accedé a tus conversaciones, retomá contexto y seguí construyendo tu asistente con una interfaz clara, moderna y responsive.
+                </p>
+            </div>
+
+            <div class="mt-10 rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
+                <p class="text-sm text-slate-300">
+                    “Una buena experiencia de login ya marca el nivel del producto.”
+                </p>
+                <p class="mt-3 text-xs uppercase tracking-[0.2em] text-slate-500">
+                    HerniaGPT UI
+                </p>
+            </div>
+        </div>
+
+        <!-- PANEL DERECHO -->
+        <div class="p-6 sm:p-10">
+            <div class="mx-auto w-full max-w-md">
+                <div class="mb-8 lg:hidden">
+                    <div class="mb-4 flex items-center gap-3">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-sm font-bold text-white">
+                            HG
+                        </div>
+                        <div>
+                            <p class="text-lg font-semibold text-white">HerniaGPT</p>
+                            <p class="text-sm text-slate-400">Asistente conversacional</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <h2 class="text-3xl font-semibold tracking-tight text-white">
+                        Iniciar sesión
+                    </h2>
+                    <p class="mt-2 text-sm text-slate-400">
+                        Ingresá con tu usuario y contraseña para continuar.
+                    </p>
+                </div>
+
+                {% if form.non_field_errors %}
+                    <div class="mb-6 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <form method="post" class="space-y-5">
+                    {% csrf_token %}
+
+                    {% if next %}
+                        <input type="hidden" name="next" value="{{ next }}">
+                    {% endif %}
+
+                    <div>
+                        <label for="{{ form.username.id_for_label }}" class="mb-2 block text-sm font-medium text-slate-200">
+                            Usuario
+                        </label>
+                        <input
+                            type="text"
+                            name="{{ form.username.html_name }}"
+                            id="{{ form.username.id_for_label }}"
+                            value="{{ form.username.value|default:'' }}"
+                            autocomplete="username"
+                            required
+                            class="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                            placeholder="Tu usuario"
+                        >
+                        {% if form.username.errors %}
+                            <div class="mt-2 text-sm text-red-400">
+                                {% for error in form.username.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label for="{{ form.password.id_for_label }}" class="mb-2 block text-sm font-medium text-slate-200">
+                            Contraseña
+                        </label>
+                        <input
+                            type="password"
+                            name="{{ form.password.html_name }}"
+                            id="{{ form.password.id_for_label }}"
+                            autocomplete="current-password"
+                            required
+                            class="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-white outline-none transition placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                            placeholder="Tu contraseña"
+                        >
+                        {% if form.password.errors %}
+                            <div class="mt-2 text-sm text-red-400">
+                                {% for error in form.password.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="inline-flex w-full items-center justify-center rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                    >
+                        Ingresar
+                    </button>
+                </form>
+
+                <div class="mt-6 text-center text-sm text-slate-400">
+                    <p>
+                        ¿Todavía no definimos registro público? Por ahora el acceso es administrado.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Base de conocimiento | HerniaGPT{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-3xl font-semibold text-white">Base de conocimiento</h1>
+            <p class="mt-2 text-sm text-slate-400">
+                {% if is_admin %}
+                    Administrá topics publicados y borradores.
+                {% else %}
+                    Consultá topics corporativos publicados por los administradores.
+                {% endif %}
+            </p>
+        </div>
+
+        {% if is_admin %}
+            <a
+                href="{% url 'knowledge:topic_create' %}"
+                class="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-3 font-semibold text-white shadow-lg shadow-cyan-950/30 transition hover:scale-[1.01] hover:from-cyan-400 hover:to-blue-500"
+            >
+                + Nuevo topic
+            </a>
+        {% endif %}
+    </div>
+
+    {% if topics %}
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {% for topic in topics %}
+                <div class="rounded-3xl border border-white/10 bg-slate-900/70 p-5 shadow-xl transition hover:border-cyan-400/30 hover:bg-slate-900">
+                    <a href="{% url 'knowledge:topic_detail' topic.slug %}" class="block">
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <span class="inline-flex rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-300">
+                                {{ topic.category.name }}
+                            </span>
+
+                            {% if is_admin %}
+                                {% if topic.status == "PUBLISHED" %}
+                                    <span class="inline-flex rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
+                                        Publicado
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex rounded-full border border-amber-400/20 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-300">
+                                        Borrador
+                                    </span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+
+                        <h2 class="text-lg font-semibold text-white">
+                            {{ topic.title }}
+                        </h2>
+
+                        <p class="mt-2 line-clamp-3 text-sm text-slate-400">
+                            {{ topic.summary|default:topic.content|truncatechars:180 }}
+                        </p>
+                    </a>
+
+                    <div class="mt-4 flex items-center justify-between gap-3">
+                        <a
+                            href="{% url 'knowledge:topic_detail' topic.slug %}"
+                            class="text-sm font-medium text-cyan-300"
+                        >
+                            Ver topic
+                        </a>
+
+                        {% if is_admin %}
+                            <a
+                                href="{% url 'knowledge:topic_edit' topic.slug %}"
+                                class="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-medium text-slate-200 transition hover:bg-white/[0.08]"
+                            >
+                                Editar
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="rounded-3xl border border-dashed border-white/10 bg-slate-900/50 p-8 text-center">
+            {% if is_admin %}
+                <p class="text-lg font-medium text-white">Todavía no hay topics cargados.</p>
+                <p class="mt-2 text-sm text-slate-400">
+                    Creá tu primer topic para comenzar a construir la base de conocimiento.
+                </p>
+
+                <div class="mt-6">
+                    <a
+                        href="{% url 'knowledge:topic_create' %}"
+                        class="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-3 font-semibold text-white shadow-lg shadow-cyan-950/30 transition hover:scale-[1.01] hover:from-cyan-400 hover:to-blue-500"
+                    >
+                        Crear primer topic
+                    </a>
+                </div>
+            {% else %}
+                <p class="text-lg font-medium text-white">No hay topics publicados.</p>
+                <p class="mt-2 text-sm text-slate-400">
+                    Cuando un administrador publique contenido, aparecerá acá.
+                </p>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

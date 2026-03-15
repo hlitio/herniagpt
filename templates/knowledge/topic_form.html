@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }} | HerniaGPT{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+    <div class="mb-6 flex items-center justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-semibold text-white">
+                {{ page_title }}
+            </h1>
+            <p class="mt-2 text-sm text-slate-400">
+                {% if is_edit %}
+                    Actualizá la información del topic seleccionado.
+                {% else %}
+                    Creá un nuevo topic para la base de conocimiento.
+                {% endif %}
+            </p>
+        </div>
+
+        <a
+            href="{% url 'knowledge:topic_list' %}"
+            class="inline-flex items-center rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/[0.08]"
+        >
+            Volver
+        </a>
+    </div>
+
+    <div class="rounded-3xl border border-white/10 bg-slate-900/70 p-6 shadow-2xl">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="rounded-2xl border border-red-400/20 bg-red-500/10 p-4 text-sm text-red-300">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div>
+                <label for="{{ form.category.id_for_label }}" class="mb-2 block text-sm font-medium text-slate-200">
+                    Categoría
+                </label>
+                {{ form.category }}
+                {% if form.category.errors %}
+                    <p class="mt-2 text-sm text-red-300">{{ form.category.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.title.id_for_label }}" class="mb-2 block text-sm font-medium text-slate-200">
+                    Título
+                </label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <p class="mt-2 text-sm text-red-300">{{ form.title.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.summary.id_for_label }}" class="mb-2 block text-sm font-medium text-slate-200">
+                    Resumen
+                </label>
+                {{ form.summary }}
+                {% if form.summary.errors %}
+                    <p class="mt-2 text-sm text-red-300">{{ form.summary.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.content.id_for_label }}" class="mb-2 block text-sm font-medium text-slate-200">
+                    Contenido
+                </label>
+                {{ form.content }}
+                {% if form.content.errors %}
+                    <p class="mt-2 text-sm text-red-300">{{ form.content.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <label for="{{ form.status.id_for_label }}" class="mb-2 block text-sm font-medium text-slate-200">
+                    Estado
+                </label>
+                {{ form.status }}
+                {% if form.status.errors %}
+                    <p class="mt-2 text-sm text-red-300">{{ form.status.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 pt-2">
+                <button
+                    type="submit"
+                    class="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-3 font-semibold text-white shadow-lg shadow-cyan-950/30 transition hover:scale-[1.01] hover:from-cyan-400 hover:to-blue-500"
+                >
+                    {{ submit_label }}
+                </button>
+
+                <a
+                    href="{% url 'knowledge:topic_list' %}"
+                    class="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-3 font-medium text-slate-200 transition hover:bg-white/[0.08]"
+                >
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

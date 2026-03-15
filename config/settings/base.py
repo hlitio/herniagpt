@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "core",
     "accounts",
     "chat",
+    "knowledge",
 ]
 
 TAILWIND_APP_NAME = "theme"
@@ -103,3 +104,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/chat/"
 LOGOUT_REDIRECT_URL = "/"
+
+LM_STUDIO_BASE_URL = os.getenv("LM_STUDIO_BASE_URL", "http://127.0.0.1:1234/v1")
+LM_STUDIO_MODEL = os.getenv("LM_STUDIO_MODEL", "qwen2.5-7b-instruct")
+LM_STUDIO_API_KEY = os.getenv("LM_STUDIO_API_KEY", "lm-studio")

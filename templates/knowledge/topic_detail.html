@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load markdown_extras %}
+
+{% block title %}{{ topic.title }} | HerniaGPT{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+    <div class="mb-6">
+        <a
+            href="{% url 'knowledge:topic_list' %}"
+            class="text-sm text-cyan-300 hover:text-cyan-200"
+        >
+            ← Volver a la base de conocimiento
+        </a>
+    </div>
+
+    <div class="rounded-3xl border border-white/10 bg-slate-900/70 p-6 shadow-2xl">
+        <div class="mb-4 flex flex-wrap items-center gap-3">
+            <span class="inline-flex rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-300">
+                {{ topic.category.name }}
+            </span>
+
+            <span class="inline-flex rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium text-slate-300">
+                Actualizado: {{ topic.updated_at|date:"d/m/Y H:i" }}
+            </span>
+        </div>
+
+        <h1 class="text-3xl font-semibold text-white">
+            {{ topic.title }}
+        </h1>
+
+        {% if topic.summary %}
+            <div class="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <h2 class="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
+                    Resumen
+                </h2>
+                <div class="whitespace-pre-wrap text-sm leading-7 text-slate-200">
+                    {{ topic.summary|markdownify }}
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <h2 class="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
+                Contenido
+            </h2>
+            <div class="whitespace-pre-wrap text-sm leading-7 text-slate-200">
+                {{ topic.content|markdownify }}
+            </div>
+        </div>
+
+        <div class="mt-6">
+            <a
+                href="{% url 'knowledge:start_topic_chat' topic.slug %}"
+                class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-3 font-semibold text-white shadow-lg shadow-cyan-950/30 transition hover:scale-[1.01] hover:from-cyan-400 hover:to-blue-500"
+            >
+                Preguntarle a HerniaGPT sobre este topic
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

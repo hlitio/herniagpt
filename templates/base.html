@@ -12,87 +12,148 @@
         <header class="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/80 backdrop-blur">
             <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
 
-                <!-- LOGO -->
-                <a href="/" class="flex items-center gap-3">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 font-bold text-white">
-                        HG
-                    </div>
-
-                    <div class="leading-tight">
-                        <p class="font-semibold text-white">HerniaGPT</p>
-                        <p class="text-xs text-slate-400 hidden sm:block">
-                            Chat inteligente hecho con Django
-                        </p>
-                    </div>
-                </a>
-
-
-                <!-- USER MENU -->
-                {% if user.is_authenticated %}
-
-                <details class="relative">
-
-                    <summary class="flex cursor-pointer list-none items-center gap-3">
-
-                        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 border border-slate-700 text-sm font-semibold text-white">
-                            {{ user.username|first|upper }}
+                <div class="flex items-center gap-8">
+                    <a href="/" class="flex items-center gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 font-bold text-white">
+                            HG
                         </div>
 
-                    </summary>
-
-                    <div class="absolute right-0 mt-3 w-56 rounded-xl border border-slate-800 bg-slate-900 shadow-xl">
-
-                        <div class="border-b border-slate-800 p-4">
-                            <p class="text-sm font-medium text-white">
-                                {{ user.username }}
-                            </p>
-                            <p class="text-xs text-slate-400">
-                                Usuario autenticado
+                        <div class="leading-tight">
+                            <p class="font-semibold text-white">HerniaGPT</p>
+                            <p class="hidden text-xs text-slate-400 sm:block">
+                                Chat inteligente hecho con Django
                             </p>
                         </div>
+                    </a>
 
-                        <div class="p-2 flex flex-col gap-1">
-
+                    {% if user.is_authenticated %}
+                        <nav class="hidden items-center gap-2 md:flex">
                             <a
                                 href="/chat/"
-                                class="rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
+                                class="rounded-lg px-3 py-2 text-sm font-medium transition
+                                {% if request.path|slice:':6' == '/chat/' %}
+                                    bg-slate-800 text-white
+                                {% else %}
+                                    text-slate-300 hover:bg-slate-800 hover:text-white
+                                {% endif %}"
                             >
                                 Chat
                             </a>
 
                             <a
-                                href="#"
-                                class="rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
+                                href="{% url 'knowledge:topic_list' %}"
+                                class="rounded-lg px-3 py-2 text-sm font-medium transition
+                                {% if request.path|slice:':11' == '/knowledge/' and '/knowledge/new/' not in request.path %}
+                                    bg-slate-800 text-white
+                                {% else %}
+                                    text-slate-300 hover:bg-slate-800 hover:text-white
+                                {% endif %}"
                             >
-                                Perfil
+                                Base de conocimiento
                             </a>
 
-                            <form method="post" action="/accounts/logout/">
-                                {% csrf_token %}
-                                <button
-                                    class="w-full text-left rounded-lg px-3 py-2 text-sm text-red-400 hover:bg-slate-800"
+                            {% if user.profile.role == "ADMIN" %}
+                                <a
+                                    href="{% url 'knowledge:topic_create' %}"
+                                    class="rounded-lg px-3 py-2 text-sm font-medium transition
+                                    {% if request.path == '/knowledge/new/' %}
+                                        bg-cyan-500/15 text-cyan-300
+                                    {% else %}
+                                        text-cyan-300 hover:bg-slate-800 hover:text-cyan-200
+                                    {% endif %}"
                                 >
-                                    Salir
-                                </button>
-                            </form>
+                                    Nuevo topic
+                                </a>
+                            {% endif %}
+                        </nav>
+                    {% endif %}
+                </div>
 
+                {% if user.is_authenticated %}
+                    <details class="relative">
+                        <summary class="flex cursor-pointer list-none items-center gap-3">
+                            <div class="hidden text-right sm:block">
+                                <p class="text-sm font-medium text-white">
+                                    {{ user.username }}
+                                </p>
+                                <p class="text-xs text-slate-400">
+                                    {% if user.profile.role == "ADMIN" %}
+                                        Administrador
+                                    {% else %}
+                                        Usuario
+                                    {% endif %}
+                                </p>
+                            </div>
+
+                            <div class="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-800 text-sm font-semibold text-white">
+                                {{ user.username|first|upper }}
+                            </div>
+                        </summary>
+
+                        <div class="absolute right-0 mt-3 w-64 rounded-xl border border-slate-800 bg-slate-900 shadow-xl">
+                            <div class="border-b border-slate-800 p-4">
+                                <p class="text-sm font-medium text-white">
+                                    {{ user.username }}
+                                </p>
+                                <p class="text-xs text-slate-400">
+                                    {% if user.profile.role == "ADMIN" %}
+                                        Administrador
+                                    {% else %}
+                                        Usuario
+                                    {% endif %}
+                                </p>
+                            </div>
+
+                            <div class="flex flex-col gap-1 p-2">
+                                <a
+                                    href="/chat/"
+                                    class="rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
+                                >
+                                    Chat
+                                </a>
+
+                                <a
+                                    href="{% url 'knowledge:topic_list' %}"
+                                    class="rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
+                                >
+                                    Base de conocimiento
+                                </a>
+
+                                {% if user.profile.role == "ADMIN" %}
+                                    <a
+                                        href="{% url 'knowledge:topic_create' %}"
+                                        class="rounded-lg px-3 py-2 text-sm text-cyan-300 hover:bg-slate-800 hover:text-cyan-200"
+                                    >
+                                        Nuevo topic
+                                    </a>
+                                {% endif %}
+
+                                <a
+                                    href="#"
+                                    class="rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
+                                >
+                                    Perfil
+                                </a>
+
+                                <form method="post" action="/accounts/logout/">
+                                    {% csrf_token %}
+                                    <button
+                                        class="w-full rounded-lg px-3 py-2 text-left text-sm text-red-400 hover:bg-slate-800"
+                                    >
+                                        Salir
+                                    </button>
+                                </form>
+                            </div>
                         </div>
-
-                    </div>
-
-                </details>
-
+                    </details>
                 {% else %}
-
-                <a
-                    href="/accounts/login/"
-                    class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500"
-                >
-                    Iniciar sesión
-                </a>
-
+                    <a
+                        href="/accounts/login/"
+                        class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500"
+                    >
+                        Iniciar sesión
+                    </a>
                 {% endif %}
-
             </div>
         </header>
 

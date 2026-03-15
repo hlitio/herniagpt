@@ -3,219 +3,723 @@
 {% block title %}Chat | HerniaGPT{% endblock %}
 
 {% block content %}
-<style>
-    .chat-layout {
-        display: grid;
-        grid-template-columns: 280px 1fr;
-        gap: 20px;
-        min-height: 70vh;
-    }
-
-    .sidebar {
-        background: #111827;
-        border: 1px solid #1f2937;
-        border-radius: 12px;
-        padding: 16px;
-    }
-
-    .sidebar h2 {
-        margin-top: 0;
-        font-size: 18px;
-    }
-
-    .conversation-list {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        margin-top: 16px;
-    }
-
-    .conversation-item {
-        display: block;
-        padding: 10px 12px;
-        border-radius: 8px;
-        background: #0f172a;
-        color: #e5e7eb;
-        text-decoration: none;
-        border: 1px solid #1f2937;
-    }
-
-    .conversation-item.active {
-        background: #1d4ed8;
-        border-color: #2563eb;
-        color: white;
-    }
-
-    .new-chat-form {
-        margin-bottom: 16px;
-    }
-
-    .new-chat-btn {
-        width: 100%;
-        background: #2563eb;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 10px 12px;
-        cursor: pointer;
-    }
-
-    .chat-panel {
-        background: #111827;
-        border: 1px solid #1f2937;
-        border-radius: 12px;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-    }
-
-    .chat-header {
-        padding: 16px;
-        border-bottom: 1px solid #1f2937;
-    }
-
-    .chat-title {
-        margin: 0;
-        font-size: 18px;
-    }
-
-    .messages {
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        min-height: 420px;
-    }
-
-    .message-row {
-        display: flex;
-    }
-
-    .message-row.user {
-        justify-content: flex-end;
-    }
-
-    .message-row.assistant,
-    .message-row.system {
-        justify-content: flex-start;
-    }
-
-    .bubble {
-        max-width: 75%;
-        padding: 12px 14px;
-        border-radius: 12px;
-        line-height: 1.45;
-        white-space: pre-wrap;
-    }
-
-    .message-row.user .bubble {
-        background: #2563eb;
-        color: white;
-    }
-
-    .message-row.assistant .bubble,
-    .message-row.system .bubble {
-        background: #1f2937;
-        color: #e5e7eb;
-    }
-
-    .composer {
-        border-top: 1px solid #1f2937;
-        padding: 16px;
-    }
-
-    .composer form {
-        display: flex;
-        gap: 12px;
-    }
-
-    .composer textarea {
-        flex: 1;
-        min-height: 60px;
-        resize: vertical;
-        border-radius: 10px;
-        border: 1px solid #334155;
-        background: #0f172a;
-        color: white;
-        padding: 12px;
-        font: inherit;
-    }
-
-    .composer button {
-        background: #2563eb;
-        color: white;
-        border: none;
-        border-radius: 10px;
-        padding: 0 18px;
-        cursor: pointer;
-    }
-
-    .empty-state {
-        color: #94a3b8;
-    }
-
-    @media (max-width: 900px) {
-        .chat-layout {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
-
-<div class="chat-layout">
-    <aside class="sidebar">
-        <h2>Conversaciones</h2>
-
-        <form class="new-chat-form" method="post" action="{% url 'chat:new' %}">
-            {% csrf_token %}
-            <button type="submit" class="new-chat-btn">+ Nuevo chat</button>
-        </form>
-
-        <div class="conversation-list">
-            {% for conv in conversations %}
-                <a
-                    href="{% url 'chat:detail' conv.pk %}"
-                    class="conversation-item {% if conversation and conv.pk == conversation.pk %}active{% endif %}"
-                >
-                    {{ conv.title }}
-                </a>
-            {% empty %}
-                <p class="empty-state">Todavía no hay conversaciones.</p>
-            {% endfor %}
+<div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <div class="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950 shadow-2xl">
+        <!-- Fondo decorativo -->
+        <div class="pointer-events-none absolute inset-0">
+            <div class="absolute -left-24 top-0 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl"></div>
+            <div class="absolute right-0 top-20 h-80 w-80 rounded-full bg-blue-600/10 blur-3xl"></div>
+            <div class="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-violet-500/10 blur-3xl"></div>
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.04),transparent_35%)]"></div>
         </div>
-    </aside>
 
-    <section class="chat-panel">
-        {% if conversation %}
-            <div class="chat-header">
-                <h1 class="chat-title">{{ conversation.title }}</h1>
-            </div>
+        <div class="relative grid min-h-[78vh] grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)]">
+            <!-- SIDEBAR -->
+            <aside class="border-b border-white/10 bg-slate-900/70 backdrop-blur-xl lg:border-b-0 lg:border-r">
+                <div class="flex h-full flex-col">
+                    <div class="border-b border-white/10 p-5">
+                        <div class="mb-4 flex items-center gap-3">
+                            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 via-blue-500 to-violet-500 text-lg font-bold text-white shadow-lg shadow-blue-900/40">
+                                AI
+                            </div>
+                            <div>
+                                <h2 class="text-base font-semibold text-white">HerniaGPT</h2>
+                                <p class="text-sm text-slate-400">Tu espacio de conversación inteligente</p>
+                            </div>
+                        </div>
 
-            <div class="messages">
-                {% for message in conversation.messages.all %}
-                    <div class="message-row {{ message.role }}">
-                        <div class="bubble">{{ message.content }}</div>
+                        <form id="new-chat-form" method="post" action="{% url 'chat:new' %}">
+                            {% csrf_token %}
+                            <button
+                                type="submit"
+                                class="group inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-cyan-400/20 bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-900/20 transition hover:scale-[1.01] hover:from-cyan-400 hover:to-blue-500"
+                            >
+                                <span class="text-lg leading-none">+</span>
+                                <span>Nuevo chat</span>
+                            </button>
+                        </form>
                     </div>
-                {% empty %}
-                    <p class="empty-state">Escribí tu primer mensaje para comenzar.</p>
-                {% endfor %}
-            </div>
 
-            <div class="composer">
-                <form method="post" action="{% url 'chat:send' conversation.pk %}">
-                    {% csrf_token %}
-                    <textarea
-                        name="content"
-                        placeholder="Escribí tu mensaje..."
-                        required
-                    ></textarea>
-                    <button type="submit">Enviar</button>
-                </form>
-            </div>
-        {% else %}
-            <div class="messages">
-                <p class="empty-state">No hay una conversación seleccionada.</p>
-            </div>
-        {% endif %}
-    </section>
+                    <div class="flex-1 overflow-y-auto p-4">
+                        <div class="mb-3 flex items-center justify-between">
+                            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                                Conversaciones
+                            </p>
+                            <div class="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[11px] text-slate-400">
+                                {{ conversations|length }}
+                            </div>
+                        </div>
+
+                        <div id="conversation-list" class="space-y-2">
+                            {% for conv in conversations %}
+                                <a
+                                    href="{% url 'chat:detail' conv.pk %}"
+                                    data-conversation-id="{{ conv.pk }}"
+                                    class="conversation-link group block rounded-2xl border px-4 py-3 transition {% if conversation and conv.pk == conversation.pk %}border-cyan-400/30 bg-gradient-to-r from-cyan-500/15 to-blue-500/10 shadow-lg shadow-cyan-950/20{% else %}border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]{% endif %}"
+                                >
+                                    <div class="flex items-start gap-3">
+                                        <div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl {% if conversation and conv.pk == conversation.pk %}bg-cyan-400/20 text-cyan-300{% else %}bg-slate-800 text-slate-400 group-hover:text-slate-200{% endif %}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h8M8 14h5m-9 6 2.2-2.2a2 2 0 0 1 1.4-.6H18a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 .6 1.4L4 20Z" />
+                                            </svg>
+                                        </div>
+
+                                        <div class="min-w-0 flex-1">
+                                            <p
+                                                data-conversation-title="{{ conv.pk }}"
+                                                class="truncate text-sm font-medium {% if conversation and conv.pk == conversation.pk %}text-white{% else %}text-slate-200{% endif %}"
+                                            >
+                                                {{ conv.title }}
+                                            </p>
+                                            <p class="mt-1 text-xs text-slate-500">
+                                                Abrir conversación
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
+                            {% empty %}
+                                <div id="empty-conversations-state" class="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-5 text-center">
+                                    <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-800 text-slate-400">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h8M8 14h5m-1 8-2.3-2.3a2 2 0 0 0-1.4-.6H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-1.3a2 2 0 0 0-1.4.6L12 22Z" />
+                                        </svg>
+                                    </div>
+                                    <p class="text-sm font-medium text-slate-200">Todavía no hay conversaciones</p>
+                                    <p class="mt-1 text-sm text-slate-500">
+                                        Creá tu primer chat para empezar a interactuar.
+                                    </p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- PANEL PRINCIPAL -->
+            <section class="flex min-h-[78vh] flex-col bg-slate-950/70 backdrop-blur-xl">
+                {% if conversation %}
+                    <!-- Header -->
+                    <div class="border-b border-white/10 bg-slate-900/40 px-5 py-4 sm:px-6">
+                        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div class="flex min-w-0 items-center gap-3">
+                                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 text-cyan-300 ring-1 ring-white/10">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3h6m-9.75 8.25h12.75A2.25 2.25 0 0 0 18.75 17.25V6.75A2.25 2.25 0 0 0 16.5 4.5h-9A2.25 2.25 0 0 0 5.25 6.75v10.5A2.25 2.25 0 0 0 7.5 19.5Z" />
+                                    </svg>
+                                </div>
+
+                                <div class="min-w-0">
+                                    <h1 id="conversation-title-main" class="truncate text-lg font-semibold text-white sm:text-xl">
+                                        {{ conversation.title }}
+                                    </h1>
+
+                                    {% if conversation.topic %}
+                                        <div class="mt-2 flex flex-wrap items-center gap-2">
+                                            <span class="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-300">
+                                                Topic guiado
+                                            </span>
+
+                                            <a
+                                                href="{% url 'knowledge:topic_detail' conversation.topic.slug %}"
+                                                class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium text-slate-300 transition hover:bg-white/[0.08]"
+                                            >
+                                                Ver topic: {{ conversation.topic.title }}
+                                            </a>
+                                        </div>
+                                    {% else %}
+                                        <p class="text-sm text-slate-400">
+                                            Conversación activa con HerniaGPT
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-2">
+                                {% if conversation.topic %}
+                                    <span class="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-300">
+                                        <span class="h-2 w-2 rounded-full bg-cyan-400"></span>
+                                        IA guiada por topic
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
+                                        <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                                        IA disponible
+                                    </span>
+                                {% endif %}
+
+                                <button
+                                    type="button"
+                                    id="rename-chat-btn"
+                                    class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-medium text-slate-200 transition hover:bg-white/[0.08]"
+                                >
+                                    Renombrar
+                                </button>
+
+                                <button
+                                    type="button"
+                                    id="delete-chat-btn"
+                                    class="inline-flex items-center gap-2 rounded-xl border border-red-400/20 bg-red-500/10 px-3 py-2 text-xs font-medium text-red-300 transition hover:bg-red-500/20"
+                                >
+                                    Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mensajes -->
+                    <div id="messages-container" class="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
+                        {% if conversation.messages.all %}
+                            <div class="mx-auto flex max-w-4xl flex-col gap-5">
+                                {% for message in conversation.messages.all %}
+                                    <div class="flex {% if message.role == 'user' %}justify-end{% else %}justify-start{% endif %}">
+                                        <div class="flex max-w-[92%] items-end gap-3 sm:max-w-[80%] {% if message.role == 'user' %}flex-row-reverse{% endif %}">
+                                            <div class="mb-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-sm font-semibold shadow-lg
+                                                {% if message.role == 'user' %}
+                                                    bg-gradient-to-br from-blue-500 to-cyan-500 text-white
+                                                {% elif message.role == 'assistant' %}
+                                                    bg-gradient-to-br from-violet-500/20 to-cyan-500/20 text-cyan-300 ring-1 ring-white/10
+                                                {% else %}
+                                                    bg-slate-800 text-slate-300 ring-1 ring-white/10
+                                                {% endif %}
+                                            ">
+                                                {% if message.role == 'user' %}
+                                                    Tú
+                                                {% elif message.role == 'assistant' %}
+                                                    AI
+                                                {% else %}
+                                                    SYS
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="rounded-3xl px-4 py-3 shadow-xl ring-1
+                                                {% if message.role == 'user' %}
+                                                    bg-gradient-to-br from-blue-600 to-cyan-500 text-white ring-cyan-300/10
+                                                {% elif message.role == 'assistant' %}
+                                                    bg-white/[0.05] text-slate-100 ring-white/10 backdrop-blur-sm
+                                                {% else %}
+                                                    bg-amber-500/10 text-amber-100 ring-amber-400/20
+                                                {% endif %}
+                                            ">
+                                                <div class="mb-2 flex items-center gap-2">
+                                                    <span class="text-[11px] font-semibold uppercase tracking-[0.18em]
+                                                        {% if message.role == 'user' %}
+                                                            text-blue-100/80
+                                                        {% elif message.role == 'assistant' %}
+                                                            text-cyan-300/80
+                                                        {% else %}
+                                                            text-amber-300/80
+                                                        {% endif %}
+                                                    ">
+                                                        {{ message.role }}
+                                                    </span>
+                                                </div>
+
+                                                <div class="whitespace-pre-wrap break-words text-sm leading-7 sm:text-[15px]">
+                                                    {{ message.content }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="mx-auto flex h-full max-w-3xl items-center justify-center">
+                                <div class="w-full rounded-3xl border border-dashed border-white/10 bg-white/[0.03] p-8 text-center shadow-xl backdrop-blur-sm">
+                                    <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-cyan-500/20 via-blue-500/20 to-violet-500/20 text-cyan-300 ring-1 ring-white/10">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-1.218-2.435A2.25 2.25 0 0 0 5.767 15H4.5a2.25 2.25 0 0 1-2.25-2.25V6A2.25 2.25 0 0 1 4.5 3.75h15A2.25 2.25 0 0 1 21.75 6v6.75A2.25 2.25 0 0 1 19.5 15h-7.26a2.25 2.25 0 0 0-2.427 1.654Z" />
+                                        </svg>
+                                    </div>
+
+                                    <h3 class="text-xl font-semibold text-white">
+                                        Empezá esta conversación
+                                    </h3>
+                                    <p class="mt-2 text-sm leading-6 text-slate-400">
+                                        Podés pedir ayuda para programar, redactar, analizar información
+                                        o pensar ideas. Escribí tu primer mensaje abajo.
+                                    </p>
+
+                                    <div class="mt-6 flex flex-wrap justify-center gap-2">
+                                        <span class="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-slate-300">
+                                            “Ayudame a programar en Django”
+                                        </span>
+                                        <span class="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-slate-300">
+                                            “Resumí este texto”
+                                        </span>
+                                        <span class="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-slate-300">
+                                            “Pensá una estrategia”
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Composer -->
+                    <div class="border-t border-white/10 bg-slate-900/50 px-4 py-4 backdrop-blur-xl sm:px-6">
+                        <form id="composer-form" method="post" action="{% url 'chat:send_stream' conversation.pk %}" class="mx-auto max-w-4xl">
+                            {% csrf_token %}
+
+                            <div class="rounded-3xl border border-white/10 bg-white/[0.04] p-3 shadow-2xl ring-1 ring-white/5">
+                                <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+                                    <div class="relative flex-1">
+                                        <textarea
+                                            id="chat-textarea"
+                                            name="content"
+                                            rows="1"
+                                            required
+                                            placeholder="{% if conversation.topic %}Hacé una pregunta sobre este topic...{% else %}Escribí tu mensaje... preguntá, analizá, creá, resolvé.{% endif %}"
+                                            class="max-h-56 min-h-[56px] w-full resize-none rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-4 pr-4 text-sm text-white placeholder:text-slate-500 focus:border-cyan-400/40 focus:outline-none focus:ring-4 focus:ring-cyan-500/10"
+                                        ></textarea>
+                                    </div>
+
+                                    <button
+                                        id="send-button"
+                                        type="submit"
+                                        class="inline-flex h-14 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 font-semibold text-white shadow-lg shadow-cyan-950/30 transition hover:scale-[1.01] hover:from-cyan-400 hover:to-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.804A.75.75 0 0 1 4.23 2.85l15.54 8.486a.75.75 0 0 1 0 1.328L4.23 21.15a.75.75 0 0 1-.961-.954L6 12Zm0 0h7.5" />
+                                        </svg>
+                                        Enviar
+                                    </button>
+                                </div>
+
+                                <div class="mt-3 flex flex-wrap items-center gap-2 px-1">
+                                    <span class="text-[11px] uppercase tracking-[0.18em] text-slate-500">Sugerencias</span>
+                                    <button type="button" class="prompt-chip rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-slate-400 hover:bg-white/[0.06]">Código</button>
+                                    <button type="button" class="prompt-chip rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-slate-400 hover:bg-white/[0.06]">Resumen</button>
+                                    <button type="button" class="prompt-chip rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-slate-400 hover:bg-white/[0.06]">Ideas</button>
+                                    <button type="button" class="prompt-chip rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-slate-400 hover:bg-white/[0.06]">Análisis</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                {% else %}
+                    <!-- Sin conversación seleccionada -->
+                    <div class="flex flex-1 items-center justify-center px-6 py-10">
+                        <div class="mx-auto w-full max-w-3xl text-center">
+                            <div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-[2rem] bg-gradient-to-br from-cyan-500/20 via-blue-500/20 to-violet-500/20 text-cyan-300 ring-1 ring-white/10 shadow-2xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-9 w-9" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12c0-4.28 3.47-7.75 7.75-7.75h4c4.28 0 7.75 3.47 7.75 7.75S18.28 19.75 14 19.75h-1.386a1.5 1.5 0 0 0-.948.338l-2.671 2.136A.75.75 0 0 1 7.75 21.64v-1.89A7.756 7.756 0 0 1 2.25 12Z" />
+                                </svg>
+                            </div>
+
+                            <h1 class="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                                Bienvenido a HerniaGPT
+                            </h1>
+                            <p class="mx-auto mt-4 max-w-2xl text-sm leading-7 text-slate-400 sm:text-base">
+                                Seleccioná una conversación existente o creá un nuevo chat para empezar.
+                                Diseñado para sentirse como una herramienta real de IA: rápida, limpia y enfocada.
+                            </p>
+
+                            <div class="mt-8 grid gap-3 sm:grid-cols-3">
+                                <div class="rounded-3xl border border-white/10 bg-white/[0.04] p-5 text-left shadow-xl">
+                                    <p class="text-sm font-semibold text-white">Programación</p>
+                                    <p class="mt-2 text-sm text-slate-400">
+                                        Pedí ayuda con Django, Python, bugs, arquitectura y UI.
+                                    </p>
+                                </div>
+                                <div class="rounded-3xl border border-white/10 bg-white/[0.04] p-5 text-left shadow-xl">
+                                    <p class="text-sm font-semibold text-white">Escritura</p>
+                                    <p class="mt-2 text-sm text-slate-400">
+                                        Redactá textos, correos, documentación o propuestas.
+                                    </p>
+                                </div>
+                                <div class="rounded-3xl border border-white/10 bg-white/[0.04] p-5 text-left shadow-xl">
+                                    <p class="text-sm font-semibold text-white">Análisis</p>
+                                    <p class="mt-2 text-sm text-slate-400">
+                                        Ordená ideas, evaluá opciones y resolvé problemas complejos.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <form method="post" action="{% url 'chat:new' %}" class="mt-8">
+                                {% csrf_token %}
+                                <button
+                                    type="submit"
+                                    class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 px-6 py-3 font-semibold text-white shadow-lg shadow-cyan-950/30 transition hover:scale-[1.01] hover:from-cyan-400 hover:to-blue-500"
+                                >
+                                    <span class="text-lg leading-none">+</span>
+                                    Crear nuevo chat
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endif %}
+            </section>
+        </div>
+    </div>
 </div>
+
+<script>
+    (function () {
+        const textarea = document.getElementById("chat-textarea");
+        const messagesContainer = document.getElementById("messages-container");
+        const composerForm = document.getElementById("composer-form");
+        const sendButton = document.getElementById("send-button");
+        const renameBtn = document.getElementById("rename-chat-btn");
+        const deleteBtn = document.getElementById("delete-chat-btn");
+        const mainTitle = document.getElementById("conversation-title-main");
+        const newChatForm = document.getElementById("new-chat-form");
+        const promptChips = document.querySelectorAll(".prompt-chip");
+
+        function getCsrfToken() {
+            const input = document.querySelector('input[name="csrfmiddlewaretoken"]');
+            return input ? input.value : "";
+        }
+
+        function scrollMessagesToBottom(force = false) {
+            if (!messagesContainer) return;
+
+            if (force) {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                return;
+            }
+
+            requestAnimationFrame(() => {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            });
+        }
+
+        function resizeTextarea() {
+            if (!textarea) return;
+            textarea.style.height = "auto";
+            textarea.style.height = Math.min(textarea.scrollHeight, 224) + "px";
+        }
+
+        function escapeHtml(value) {
+            const div = document.createElement("div");
+            div.textContent = value;
+            return div.innerHTML;
+        }
+
+        function getMessagesWrapper() {
+            if (!messagesContainer) return null;
+
+            let wrapper = messagesContainer.querySelector(".mx-auto.flex.max-w-4xl.flex-col.gap-5");
+
+            if (!wrapper) {
+                messagesContainer.innerHTML = "";
+                wrapper = document.createElement("div");
+                wrapper.className = "mx-auto flex max-w-4xl flex-col gap-5";
+                messagesContainer.appendChild(wrapper);
+            }
+
+            return wrapper;
+        }
+
+        function appendMessage(role, content) {
+            const wrapper = getMessagesWrapper();
+            if (!wrapper) return null;
+
+            const isUser = role === "user";
+            const isAssistant = role === "assistant";
+
+            const row = document.createElement("div");
+            row.className = `flex ${isUser ? "justify-end" : "justify-start"}`;
+
+            row.innerHTML = `
+                <div class="flex max-w-[92%] items-end gap-3 sm:max-w-[80%] ${isUser ? "flex-row-reverse" : ""}">
+                    <div class="mb-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-sm font-semibold shadow-lg
+                        ${isUser
+                            ? "bg-gradient-to-br from-blue-500 to-cyan-500 text-white"
+                            : isAssistant
+                                ? "bg-gradient-to-br from-violet-500/20 to-cyan-500/20 text-cyan-300 ring-1 ring-white/10"
+                                : "bg-slate-800 text-slate-300 ring-1 ring-white/10"}">
+                        ${isUser ? "Tú" : isAssistant ? "AI" : "SYS"}
+                    </div>
+
+                    <div class="rounded-3xl px-4 py-3 shadow-xl ring-1
+                        ${isUser
+                            ? "bg-gradient-to-br from-blue-600 to-cyan-500 text-white ring-cyan-300/10"
+                            : isAssistant
+                                ? "bg-white/[0.05] text-slate-100 ring-white/10 backdrop-blur-sm"
+                                : "bg-amber-500/10 text-amber-100 ring-amber-400/20"}">
+                        <div class="mb-2 flex items-center gap-2">
+                            <span class="text-[11px] font-semibold uppercase tracking-[0.18em]
+                                ${isUser
+                                    ? "text-blue-100/80"
+                                    : isAssistant
+                                        ? "text-cyan-300/80"
+                                        : "text-amber-300/80"}">
+                                ${escapeHtml(role)}
+                            </span>
+                        </div>
+
+                        <div class="message-content whitespace-pre-wrap break-words text-sm leading-7 sm:text-[15px]">${escapeHtml(content)}</div>
+                    </div>
+                </div>
+            `;
+
+            wrapper.appendChild(row);
+            scrollMessagesToBottom(true);
+            return row.querySelector(".message-content");
+        }
+
+        function updateConversationTitle(conversationId, title) {
+            if (mainTitle) {
+                mainTitle.textContent = title;
+            }
+
+            const sidebarTitle = document.querySelector(`[data-conversation-title="${conversationId}"]`);
+            if (sidebarTitle) {
+                sidebarTitle.textContent = title;
+            }
+        }
+
+        function focusTextarea() {
+            if (!textarea) return;
+            textarea.focus();
+            const length = textarea.value.length;
+            textarea.setSelectionRange(length, length);
+        }
+
+        function updateAssistantBubble(el, content) {
+            if (!el) return;
+            el.textContent = content;
+            scrollMessagesToBottom(true);
+        }
+
+        async function readNDJSONStream(response, handlers) {
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder("utf-8");
+            let buffer = "";
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split("\n");
+                buffer = lines.pop() || "";
+
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (!trimmed) continue;
+
+                    const data = JSON.parse(trimmed);
+                    handlers.onMessage(data);
+                }
+            }
+
+            if (buffer.trim()) {
+                const data = JSON.parse(buffer.trim());
+                handlers.onMessage(data);
+            }
+        }
+
+        if (messagesContainer) {
+            scrollMessagesToBottom(true);
+        }
+
+        if (textarea) {
+            resizeTextarea();
+
+            textarea.addEventListener("input", resizeTextarea);
+
+            textarea.addEventListener("keydown", function (e) {
+                if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    if (composerForm && textarea.value.trim()) {
+                        composerForm.requestSubmit();
+                    }
+                }
+            });
+        }
+
+        promptChips.forEach((chip) => {
+            chip.addEventListener("click", function () {
+                if (!textarea) return;
+                textarea.value = chip.textContent.trim();
+                resizeTextarea();
+                focusTextarea();
+            });
+        });
+
+        if (composerForm) {
+            composerForm.addEventListener("submit", async function (e) {
+                e.preventDefault();
+
+                const content = textarea.value.trim();
+                if (!content) return;
+
+                const formData = new FormData();
+                formData.append("content", content);
+                formData.append("csrfmiddlewaretoken", getCsrfToken());
+
+                textarea.value = "";
+                resizeTextarea();
+
+                appendMessage("user", content);
+                const assistantContentEl = appendMessage("assistant", "");
+
+                if (sendButton) {
+                    sendButton.disabled = true;
+                }
+
+                let assistantText = "";
+
+                try {
+                    const response = await fetch(composerForm.action, {
+                        method: "POST",
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest",
+                            "Accept": "application/x-ndjson",
+                        },
+                        body: formData,
+                    });
+
+                    if (!response.ok || !response.body) {
+                        updateAssistantBubble(
+                            assistantContentEl,
+                            "Ocurrió un error al iniciar el streaming."
+                        );
+                        return;
+                    }
+
+                    await readNDJSONStream(response, {
+                        onMessage(data) {
+                            if (data.type === "meta" && data.conversation) {
+                                updateConversationTitle(data.conversation.id, data.conversation.title);
+                                return;
+                            }
+
+                            if (data.type === "token") {
+                                assistantText += data.content || "";
+                                updateAssistantBubble(assistantContentEl, assistantText);
+                                return;
+                            }
+
+                            if (data.type === "error") {
+                                assistantText = data.content || "Ocurrió un error durante el streaming.";
+                                updateAssistantBubble(assistantContentEl, assistantText);
+                                return;
+                            }
+
+                            if (data.type === "done") {
+                                return;
+                            }
+                        }
+                    });
+                } catch (error) {
+                    updateAssistantBubble(
+                        assistantContentEl,
+                        "No se pudo conectar con el servidor."
+                    );
+                } finally {
+                    if (sendButton) {
+                        sendButton.disabled = false;
+                    }
+
+                    focusTextarea();
+                    scrollMessagesToBottom(true);
+                }
+            });
+        }
+
+        if (renameBtn) {
+            renameBtn.addEventListener("click", async function () {
+                const currentTitle = mainTitle ? mainTitle.textContent.trim() : "";
+                const newTitle = window.prompt("Nuevo nombre para el chat:", currentTitle);
+
+                if (newTitle === null) return;
+
+                const cleanTitle = newTitle.trim();
+                if (!cleanTitle) {
+                    window.alert("El nombre no puede estar vacío.");
+                    return;
+                }
+
+                const url = "{% url 'chat:rename' conversation.pk %}";
+                const formData = new FormData();
+                formData.append("title", cleanTitle);
+                formData.append("csrfmiddlewaretoken", getCsrfToken());
+
+                try {
+                    const response = await fetch(url, {
+                        method: "POST",
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest",
+                        },
+                        body: formData,
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.ok) {
+                        window.alert(data.error || "No se pudo renombrar el chat.");
+                        return;
+                    }
+
+                    updateConversationTitle(data.conversation.id, data.conversation.title);
+                } catch (error) {
+                    window.alert("No se pudo renombrar el chat.");
+                }
+            });
+        }
+
+        if (deleteBtn) {
+            deleteBtn.addEventListener("click", async function () {
+                const confirmed = window.confirm("¿Querés eliminar este chat?");
+                if (!confirmed) return;
+
+                const url = "{% url 'chat:delete' conversation.pk %}";
+                const formData = new FormData();
+                formData.append("csrfmiddlewaretoken", getCsrfToken());
+
+                try {
+                    const response = await fetch(url, {
+                        method: "POST",
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest",
+                        },
+                        body: formData,
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.ok) {
+                        window.alert(data.error || "No se pudo eliminar el chat.");
+                        return;
+                    }
+
+                    window.location.href = data.redirect_url;
+                } catch (error) {
+                    window.alert("No se pudo eliminar el chat.");
+                }
+            });
+        }
+
+        if (newChatForm) {
+            newChatForm.addEventListener("submit", async function (e) {
+                e.preventDefault();
+
+                const formData = new FormData();
+                formData.append("csrfmiddlewaretoken", getCsrfToken());
+
+                try {
+                    const response = await fetch(newChatForm.action, {
+                        method: "POST",
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest",
+                        },
+                        body: formData,
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.ok) {
+                        newChatForm.submit();
+                        return;
+                    }
+
+                    window.location.href = data.conversation.detail_url;
+                } catch (error) {
+                    newChatForm.submit();
+                }
+            });
+        }
+    })();
+</script>
 {% endblock %}
