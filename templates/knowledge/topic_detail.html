@@ -5,13 +5,22 @@
 
 {% block content %}
 <div class="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-    <div class="mb-6">
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
         <a
             href="{% url 'knowledge:topic_list' %}"
             class="text-sm text-cyan-300 hover:text-cyan-200"
         >
             ← Volver a la base de conocimiento
         </a>
+
+        {% if is_admin %}
+            <a
+                href="{% url 'knowledge:topic_edit' topic.slug %}"
+                class="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/[0.08]"
+            >
+                Editar topic
+            </a>
+        {% endif %}
     </div>
 
     <div class="rounded-3xl border border-white/10 bg-slate-900/70 p-6 shadow-2xl">
@@ -19,6 +28,18 @@
             <span class="inline-flex rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-300">
                 {{ topic.category.name }}
             </span>
+
+            {% if is_admin %}
+                {% if topic.status == "PUBLISHED" %}
+                    <span class="inline-flex rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
+                        Publicado
+                    </span>
+                {% else %}
+                    <span class="inline-flex rounded-full border border-amber-400/20 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-300">
+                        Borrador
+                    </span>
+                {% endif %}
+            {% endif %}
 
             <span class="inline-flex rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium text-slate-300">
                 Actualizado: {{ topic.updated_at|date:"d/m/Y H:i" }}
@@ -30,21 +51,23 @@
         </h1>
 
         {% if topic.summary %}
-            <div class="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                <h2 class="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
+            <div class="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+                <h2 class="mb-4 text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
                     Resumen
                 </h2>
-                <div class="whitespace-pre-wrap text-sm leading-7 text-slate-200">
+
+                <div class="knowledge-markdown text-sm leading-7 text-slate-200">
                     {{ topic.summary|markdownify }}
                 </div>
             </div>
         {% endif %}
 
-        <div class="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-            <h2 class="mb-2 text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
+        <div class="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+            <h2 class="mb-4 text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
                 Contenido
             </h2>
-            <div class="whitespace-pre-wrap text-sm leading-7 text-slate-200">
+
+            <div class="knowledge-markdown text-sm leading-7 text-slate-200">
                 {{ topic.content|markdownify }}
             </div>
         </div>
@@ -59,4 +82,130 @@
         </div>
     </div>
 </div>
+
+<style>
+    .knowledge-markdown h1,
+    .knowledge-markdown h2,
+    .knowledge-markdown h3,
+    .knowledge-markdown h4 {
+        color: #ffffff;
+        font-weight: 700;
+        line-height: 1.3;
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .knowledge-markdown h1 {
+        font-size: 1.75rem;
+    }
+
+    .knowledge-markdown h2 {
+        font-size: 1.25rem;
+    }
+
+    .knowledge-markdown h3 {
+        font-size: 1.05rem;
+    }
+
+    .knowledge-markdown p {
+        margin-top: 0.9rem;
+        margin-bottom: 0.9rem;
+        color: #e2e8f0;
+    }
+
+    .knowledge-markdown ul,
+    .knowledge-markdown ol {
+        margin-top: 0.9rem;
+        margin-bottom: 0.9rem;
+        padding-left: 1.4rem;
+        color: #e2e8f0;
+    }
+
+    .knowledge-markdown ul {
+        list-style-type: disc;
+    }
+
+    .knowledge-markdown ol {
+        list-style-type: decimal;
+    }
+
+    .knowledge-markdown li {
+        margin-top: 0.35rem;
+        margin-bottom: 0.35rem;
+    }
+
+    .knowledge-markdown strong {
+        color: #ffffff;
+        font-weight: 700;
+    }
+
+    .knowledge-markdown em {
+        font-style: italic;
+    }
+
+    .knowledge-markdown code {
+        background: rgba(15, 23, 42, 0.9);
+        color: #67e8f9;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 0.5rem;
+        padding: 0.15rem 0.4rem;
+        font-size: 0.9em;
+    }
+
+    .knowledge-markdown pre {
+        background: rgba(2, 6, 23, 0.95);
+        color: #e2e8f0;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 1rem;
+        padding: 1rem;
+        overflow-x: auto;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .knowledge-markdown pre code {
+        background: transparent;
+        border: 0;
+        padding: 0;
+        color: inherit;
+    }
+
+    .knowledge-markdown hr {
+        border: 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.14);
+        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .knowledge-markdown blockquote {
+        border-left: 4px solid rgba(34, 211, 238, 0.5);
+        padding-left: 1rem;
+        margin: 1rem 0;
+        color: #cbd5e1;
+    }
+
+    .knowledge-markdown table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .knowledge-markdown th,
+    .knowledge-markdown td {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0.75rem;
+        text-align: left;
+    }
+
+    .knowledge-markdown th {
+        background: rgba(255, 255, 255, 0.04);
+        color: #ffffff;
+    }
+
+    .knowledge-markdown a {
+        color: #67e8f9;
+        text-decoration: underline;
+    }
+</style>
 {% endblock %}

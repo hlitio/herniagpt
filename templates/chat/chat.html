@@ -3,6 +3,13 @@
 {% block title %}Chat | HerniaGPT{% endblock %}
 
 {% block content %}
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
 <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
     <div class="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950 shadow-2xl">
         <!-- Fondo decorativo -->
@@ -214,9 +221,7 @@
                                                     </span>
                                                 </div>
 
-                                                <div class="whitespace-pre-wrap break-words text-sm leading-7 sm:text-[15px]">
-                                                    {{ message.content }}
-                                                </div>
+                                                <div class="message-content prose prose-invert max-w-none text-sm sm:text-[15px]">{{ message.content }}</div>
                                             </div>
                                         </div>
                                     </div>
@@ -447,7 +452,9 @@
                             </span>
                         </div>
 
-                        <div class="message-content whitespace-pre-wrap break-words text-sm leading-7 sm:text-[15px]">${escapeHtml(content)}</div>
+                        <div class="message-content prose prose-invert max-w-none text-sm leading-7 sm:text-[15px]">
+                            ${renderMarkdown(content)}
+                        </div>
                     </div>
                 </div>
             `;
@@ -475,9 +482,39 @@
             textarea.setSelectionRange(length, length);
         }
 
+        function renderMarkdown(md) {
+            try {
+                if (typeof marked === "undefined") {
+                    const div = document.createElement("div");
+                    div.textContent = md || "";
+                    return div.innerHTML.replace(/\n/g, "<br>");
+                }
+
+                const raw = marked.parse(md || "");
+                const clean = typeof DOMPurify !== "undefined"
+                    ? DOMPurify.sanitize(raw)
+                    : raw;
+
+                const div = document.createElement("div");
+                div.innerHTML = clean;
+
+                if (typeof hljs !== "undefined") {
+                    div.querySelectorAll("pre code").forEach((el) => {
+                        hljs.highlightElement(el);
+                    });
+                }
+
+                return div.innerHTML;
+            } catch (error) {
+                const div = document.createElement("div");
+                div.textContent = md || "";
+                return div.innerHTML.replace(/\n/g, "<br>");
+            }
+        }
+
         function updateAssistantBubble(el, content) {
             if (!el) return;
-            el.textContent = content;
+            el.innerHTML = renderMarkdown(content);
             scrollMessagesToBottom(true);
         }
 
@@ -720,6 +757,11 @@
                 }
             });
         }
+        // Renderizar markdown de mensajes existentes al cargar la página
+        document.querySelectorAll(".message-content").forEach((el) => {
+            const raw = (el.textContent || "").trim();
+            el.innerHTML = renderMarkdown(raw);
+        });
     })();
 </script>
 {% endblock %}

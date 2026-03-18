@@ -12,7 +12,9 @@ if not SECRET_KEY:
 
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
+
+print("ALLOWED_HOSTS REAL:", ALLOWED_HOSTS)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -108,3 +110,6 @@ LOGOUT_REDIRECT_URL = "/"
 LM_STUDIO_BASE_URL = os.getenv("LM_STUDIO_BASE_URL", "http://127.0.0.1:1234/v1")
 LM_STUDIO_MODEL = os.getenv("LM_STUDIO_MODEL", "qwen2.5-7b-instruct")
 LM_STUDIO_API_KEY = os.getenv("LM_STUDIO_API_KEY", "lm-studio")
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
